@@ -16,7 +16,9 @@ export function generateTimeSlots(start: string, end: string, durationMinutes: n
     const startTime = current.toTimeString().substring(0, 5);
     current.setMinutes(current.getMinutes() + durationMinutes);
     const endTime = current.toTimeString().substring(0, 5);
-    slots.push({ startTime, endTime });
+    if (startTime !== '12:30') {
+      slots.push({ startTime, endTime });
+    }
   }
 
   return slots;
