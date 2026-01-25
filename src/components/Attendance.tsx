@@ -101,8 +101,8 @@ export default function Attendance() {
                     const mergedGroup = Object.values(slots).filter(s => s.mergedGroupId === slot.mergedGroupId);
                     const firstSlot = mergedGroup.sort((a,b) => a.startTime.localeCompare(b.startTime))[0];
                     if (slot.id !== firstSlot.id) {
-                      // This is a subsequent slot in a merged group, render empty div to keep grid alignment
-                      return <div key={slotId} />; 
+                      // This is a subsequent slot in a merged group, render nothing.
+                      return null;
                     }
 
                     const status = attendance[currentWeek]?.[firstSlot.id] || 'none';
@@ -154,41 +154,43 @@ const AttendanceSlot = ({ slot, status, onStatusChange, isMerged, mergeCount }: 
                 <p className="font-bold text-sm leading-tight">{slot.subject}</p>
                 <p className="text-xs opacity-80">{slot.type}</p>
             </div>
-            <div className="flex items-center gap-1">
-                {isMerged ? (
-                    <div className="flex items-center text-xs opacity-80 mr-auto">
-                        <GripVertical className="h-4 w-4 mr-1" />
-                        <span>{mergeCount} slots</span>
-                    </div>
-                ) : (
-                    <div className="mr-auto" />
-                )}
-                <Button
-                    size="icon"
-                    variant="ghost"
-                    className={cn(
-                        "h-7 w-7 rounded-full",
-                        status === 'present'
-                            ? 'bg-green-500/90 hover:bg-green-600 text-white'
-                            : 'bg-white/20 hover:bg-white/40 text-white/80'
+            <div className="flex items-center justify-between gap-1">
+                <div>
+                    {isMerged && (
+                        <div className="flex items-center text-xs opacity-80">
+                            <GripVertical className="h-4 w-4 mr-1" />
+                            <span>{mergeCount} slots</span>
+                        </div>
                     )}
-                    onClick={() => onStatusChange(status === 'present' ? 'none' : 'present')}
-                >
-                    <Check className="h-5 w-5" />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className={cn(
-                      "h-7 w-7 rounded-full",
-                      status === 'absent'
-                          ? 'bg-red-500/90 hover:bg-red-600 text-white'
-                          : 'bg-white/20 hover:bg-white/40 text-white/80'
-                  )}
-                  onClick={() => onStatusChange(status === 'absent' ? 'none' : 'absent')}
-                >
-                    <X className="h-5 w-5" />
-                </Button>
+                </div>
+                <div className="flex items-center gap-1">
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        className={cn(
+                            "h-7 w-7 rounded-full",
+                            status === 'present'
+                                ? 'bg-green-500/90 hover:bg-green-600 text-white'
+                                : 'bg-white/20 hover:bg-white/40 text-white/80'
+                        )}
+                        onClick={() => onStatusChange(status === 'present' ? 'none' : 'present')}
+                    >
+                        <Check className="h-5 w-5" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className={cn(
+                          "h-7 w-7 rounded-full",
+                          status === 'absent'
+                              ? 'bg-red-500/90 hover:bg-red-600 text-white'
+                              : 'bg-white/20 hover:bg-white/40 text-white/80'
+                      )}
+                      onClick={() => onStatusChange(status === 'absent' ? 'none' : 'absent')}
+                    >
+                        <X className="h-5 w-5" />
+                    </Button>
+                </div>
             </div>
         </div>
     );
