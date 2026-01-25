@@ -42,8 +42,8 @@ export const getWeekDates = (weekId: string): Date[] => {
 
 export const getWeekOptions = (semesterStart: string) => {
   const start = new Date(semesterStart);
-  const end = new Date();
-  end.setDate(end.getDate() + 14); // Add 2 future weeks
+  const end = new Date(start);
+  end.setFullYear(start.getFullYear() + 1);
   
   const groupedOptions: { month: string; weeks: { value: string; label: string }[] }[] = [];
   let current = startOfWeek(start, { weekStartsOn: 1 });
@@ -65,8 +65,7 @@ export const getWeekOptions = (semesterStart: string) => {
       current = addDays(current, 7);
   }
   
-  groupedOptions.forEach(group => group.weeks.reverse());
-  return groupedOptions.reverse();
+  return groupedOptions;
 };
 
 export const formatSlotsForAI = (slots: Record<string, Slot>): string => {
