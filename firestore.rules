@@ -1,0 +1,118 @@
+/**
+ * This Firestore Security Ruleset is designed for the AttendEase application.
+ *
+ * Core Philosophy:
+ * The security model is built for a single-user application. It ensures that
+ * all data is private and accessible only after a user has successfully
+ * authenticated. There is no concept of multiple user accounts, roles, or
+ * shared data; any signed-in user is treated as the owner of the entire
+ * dataset.
+ *
+ * Data Structure:
+ * The data is organized into flat, top-level collections such as 'holidays',
+ * 'extraClasses', 'slots', and 'attendance'. This structure is simple and
+ * avoids nested data, which aligns with the single-user model.
+ *
+ * Key Security Decisions:
+ * - All access is denied by default.
+ * - Any authenticated user is granted full Create, Read, Update, and Delete
+ *   (CRUD) permissions on all data collections.
+ * - Unauthenticated users are completely blocked from reading or writing any data.
+ * - Data validation is kept minimal in this prototyping phase, focusing strictly
+ *   on authorization rather than schema enforcement to allow for rapid
+ *   development.
+ *
+ * Denormalization for Authorization:
+ * In this single-user model, denormalization for authorization (e.g., adding
+ * an 'ownerId' to each document) is unnecessary. The user's authentication
+ * state is the sole factor for authorization decisions, making the rules
+ * extremely simple and performant.
+ *
+ * Structural Segregation:
+ * Not applicable, as all data is considered private to the single
+ * authenticated user. There is no public or shared data that would require
+ * separation into different collections.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper Functions
+
+    /**
+     * Checks if a user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Ensures a write request is from an authenticated user and the document
+     * already exists. Prevents modifying or deleting non-existent data.
+     */
+    function isExistingDocAndSignedIn() {
+      return isSignedIn() && resource != null;
+    }
+
+
+    /**
+     * @description Manages access to holiday documents.
+     * @path /holidays/{holidayId}
+     * @allow (create) An authenticated user adds a new holiday.
+     * @deny (get) An unauthenticated user tries to read a holiday.
+     * @principle Grants full data access to any authenticated user, suitable for a single-user application.
+     */
+    match /holidays/{holidayId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isExistingDocAndSignedIn();
+      allow delete: if isExistingDocAndSignedIn();
+    }
+
+    /**
+     * @description Manages access to extra class documents.
+     * @path /extraClasses/{extraClassId}
+     * @allow (update) An authenticated user modifies an existing extra class.
+     * @deny (list) An unauthenticated user tries to list all extra classes.
+     * @principle Grants full data access to any authenticated user, suitable for a single-user application.
+     */
+    match /extraClasses/{extraClassId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isExistingDocAndSignedIn();
+      allow delete: if isExistingDocAndSignedIn();
+    }
+
+    /**
+     * @description Manages access to timetable slot documents.
+     * @path /slots/{slotId}
+     * @allow (create) An authenticated user creates their weekly timetable slots.
+     * @deny (delete) An unauthenticated user tries to delete a slot.
+     * @principle Grants full data access to any authenticated user, suitable for a single-user application.
+     */
+    match /slots/{slotId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isExistingDocAndSignedIn();
+      allow delete: if isExistingDocAndSignedIn();
+    }
+
+    /**
+     * @description Manages access to weekly attendance records.
+     * @path /attendance/{attendanceId}
+     * @allow (create) An authenticated user marks attendance for a slot.
+     * @deny (get) An unauthenticated user tries to read an attendance record.
+     * @principle Grants full data access to any authenticated user, suitable for a single-user application.
+     */
+    match /attendance/{attendanceId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isExistingDocAndSignedIn();
+      allow delete: if isExistingDocAndSignedIn();
+    }
+  }
+}

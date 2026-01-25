@@ -1,0 +1,261 @@
+{
+  "entities": {
+    "Slot": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Slot",
+      "type": "object",
+      "description": "Represents a time slot in the weekly timetable grid.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Slot entity."
+        },
+        "day": {
+          "type": "string",
+          "description": "Day of the week for the slot (e.g., Monday, Tuesday)."
+        },
+        "startTime": {
+          "type": "string",
+          "description": "Start time of the slot (e.g., 08:30)."
+        },
+        "endTime": {
+          "type": "string",
+          "description": "End time of the slot (e.g., 09:30)."
+        },
+        "subject": {
+          "type": "string",
+          "description": "Name of the subject assigned to the slot."
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of the slot (Lecture or Lab).",
+          "format": "enum"
+        },
+        "color": {
+          "type": "string",
+          "description": "Color tag for the slot."
+        },
+        "mergedGroupId": {
+          "type": "string",
+          "description": "Reference to MergedGroup. ID of the merged group if the slot is part of a merged group, otherwise null."
+        }
+      },
+      "required": [
+        "id",
+        "day",
+        "startTime",
+        "endTime",
+        "subject",
+        "type",
+        "color"
+      ]
+    },
+    "MergedGroup": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "MergedGroup",
+      "type": "object",
+      "description": "Represents a group of merged slots.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the MergedGroup entity."
+        },
+        "slotIds": {
+          "type": "array",
+          "description": "References to Slots. IDs of the slots that are part of this merged group. (Relationship: MergedGroup 1:N Slot)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "slotIds"
+      ]
+    },
+    "Attendance": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Attendance",
+      "type": "object",
+      "description": "Represents attendance status for a specific slot in a specific week.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Attendance entity. Format: YYYY-WW"
+        },
+        "slotId": {
+          "type": "string",
+          "description": "Reference to Slot. ID of the slot for which attendance is recorded. (Relationship: Slot 1:N Attendance)"
+        },
+        "status": {
+          "type": "string",
+          "description": "Attendance status (present or absent).",
+          "format": "enum"
+        }
+      },
+      "required": [
+        "id",
+        "slotId",
+        "status"
+      ]
+    },
+    "Holiday": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Holiday",
+      "type": "object",
+      "description": "Represents a holiday.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Holiday entity."
+        },
+        "date": {
+          "type": "string",
+          "description": "Date of the holiday (YYYY-MM-DD).",
+          "format": "date"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the holiday."
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of holiday (National, University, or Personal).",
+          "format": "enum"
+        }
+      },
+      "required": [
+        "id",
+        "date",
+        "name",
+        "type"
+      ]
+    },
+    "ExtraClass": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ExtraClass",
+      "type": "object",
+      "description": "Represents an extra class.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ExtraClass entity."
+        },
+        "date": {
+          "type": "string",
+          "description": "Date of the extra class (YYYY-MM-DD).",
+          "format": "date"
+        },
+        "startTime": {
+          "type": "string",
+          "description": "Start time of the extra class."
+        },
+        "endTime": {
+          "type": "string",
+          "description": "End time of the extra class."
+        },
+        "subject": {
+          "type": "string",
+          "description": "Subject of the extra class."
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of the extra class (Lecture or Lab).",
+          "format": "enum"
+        },
+        "attended": {
+          "type": "boolean",
+          "description": "Indicates whether the student attended the extra class."
+        }
+      },
+      "required": [
+        "id",
+        "date",
+        "startTime",
+        "endTime",
+        "subject",
+        "type",
+        "attended"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "holidays/{holidayId}",
+        "definition": {
+          "entityName": "Holiday",
+          "schema": {
+            "$ref": "#/backend/entities/Holiday"
+          },
+          "description": "Stores holiday information. No denormalized authorization fields are needed since this is a single-user application.",
+          "params": [
+            {
+              "name": "holidayId",
+              "description": "Unique identifier for the holiday."
+            }
+          ]
+        }
+      },
+      {
+        "path": "extraClasses/{extraClassId}",
+        "definition": {
+          "entityName": "ExtraClass",
+          "schema": {
+            "$ref": "#/backend/entities/ExtraClass"
+          },
+          "description": "Stores extra class information. No denormalized authorization fields are needed since this is a single-user application.",
+          "params": [
+            {
+              "name": "extraClassId",
+              "description": "Unique identifier for the extra class."
+            }
+          ]
+        }
+      },
+      {
+        "path": "slots/{slotId}",
+        "definition": {
+          "entityName": "Slot",
+          "schema": {
+            "$ref": "#/backend/entities/Slot"
+          },
+          "description": "Stores timetable slot information. No denormalized authorization fields are needed since this is a single-user application.",
+          "params": [
+            {
+              "name": "slotId",
+              "description": "Unique identifier for the time slot."
+            }
+          ]
+        }
+      },
+      {
+        "path": "attendance/{weekId}/{slotId}",
+        "definition": {
+          "entityName": "Attendance",
+          "schema": {
+            "$ref": "#/backend/entities/Attendance"
+          },
+          "description": "Stores attendance information for a specific slot in a specific week. No denormalized authorization fields are needed since this is a single-user application.",
+          "params": [
+            {
+              "name": "weekId",
+              "description": "Unique identifier for the week (YYYY-WW)."
+            },
+            {
+              "name": "slotId",
+              "description": "Unique identifier for the time slot."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "This Firestore data structure is designed for a single-user attendance tracking application, AttendEase. It prioritizes simplicity and security by leveraging path-based ownership, as there is only one user, avoiding the need for complex authorization logic. The structure introduces new collections for Holidays and ExtraClasses, enabling their independent management and integration into attendance calculations. The design supports QAPs because listing operations will always be scoped to the implicit single user. It maintains Authorization Independence because there is no reliance on data in other collections for authorization. Holidays and extraClasses don't require user specific security rules as only one user can access the data."
+  }
+}
