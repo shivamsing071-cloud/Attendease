@@ -73,6 +73,8 @@ const appReducer = (state: AppState, action: Action): AppState => {
     }
     case 'UPDATE_SETTINGS':
         return { ...state, settings: { ...state.settings, ...action.payload } };
+    case 'RESET_STATE':
+        return INITIAL_STATE;
     default:
       return state;
   }

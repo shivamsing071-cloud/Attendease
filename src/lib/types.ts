@@ -46,4 +46,5 @@ export type Action =
   | { type: 'SET_ATTENDANCE'; payload: { weekId: string; slotId: string; status: AttendanceStatus } }
   | { type: 'SET_BULK_ATTENDANCE'; payload: { weekId: string; status: AttendanceStatus } }
   | { type: 'CLEAR_WEEK_ATTENDANCE'; payload: { weekId: string } }
-  | { type: 'UPDATE_SETTINGS'; payload: Partial<AppSettings> };
+  | { type: 'UPDATE_SETTINGS'; payload: Partial<AppSettings> }
+  | { type: 'RESET_STATE' };

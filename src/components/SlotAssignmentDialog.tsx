@@ -9,10 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { predictSlotAssignmentAction } from '@/app/actions';
-import { formatSlotsForAI, COLORS } from '@/lib/utils';
-import type { Slot, SlotType } from '@/lib/types';
-import { Loader2, Trash2 } from 'lucide-react';
+import { COLORS } from '@/lib/utils';
+import type { Slot } from '@/lib/types';
+import { Trash2 } from 'lucide-react';
 
 const formSchema = z.object({
   subject: z.string().min(2, { message: 'Subject must be at least 2 characters.' }),
@@ -30,7 +29,6 @@ interface SlotAssignmentDialogProps {
 
 export function SlotAssignmentDialog({ slot, isOpen, onClose }: SlotAssignmentDialogProps) {
   const { state, dispatch } = useAppContext();
-  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<SlotFormValues>({
     resolver: zodResolver(formSchema),
@@ -48,27 +46,8 @@ export function SlotAssignmentDialog({ slot, isOpen, onClose }: SlotAssignmentDi
         type: slot.type || 'Lecture',
         color: slot.color || state.settings.subjectColors[slot.subject] || COLORS[Math.floor(Math.random() * COLORS.length)],
       });
-      
-      if (!slot.subject) {
-        setIsLoading(true);
-        const pastEntries = formatSlotsForAI(state.slots);
-        predictSlotAssignmentAction({
-          day: slot.day,
-          startTime: slot.startTime,
-          endTime: slot.endTime,
-          pastEntries,
-        }).then(prediction => {
-            if (prediction) {
-              form.setValue('subject', prediction.subject);
-              form.setValue('type', prediction.type);
-              if (state.settings.subjectColors[prediction.subject]) {
-                form.setValue('color', state.settings.subjectColors[prediction.subject]);
-              }
-            }
-          }).finally(() => setIsLoading(false));
-      }
     }
-  }, [isOpen, slot, form, state.slots, state.settings.subjectColors]);
+  }, [isOpen, slot, form, state.settings.subjectColors]);
 
   const onSubmit = (values: SlotFormValues) => {
     const updatedSlot: Slot = {
@@ -77,7 +56,6 @@ export function SlotAssignmentDialog({ slot, isOpen, onClose }: SlotAssignmentDi
     };
     dispatch({ type: 'UPDATE_SLOT', payload: updatedSlot });
     
-    // Save subject color preference
     if (!state.settings.subjectColors[values.subject] || state.settings.subjectColors[values.subject] !== values.color) {
       dispatch({ type: 'UPDATE_SETTINGS', payload: {
         subjectColors: { ...state.settings.subjectColors, [values.subject]: values.color }
@@ -109,7 +87,6 @@ export function SlotAssignmentDialog({ slot, isOpen, onClose }: SlotAssignmentDi
                   <FormControl>
                     <div className="relative">
                        <Input placeholder="e.g. Computer Science" {...field} />
-                       {isLoading && <Loader2 className="absolute right-2 top-2.5 h-4 w-4 animate-spin" />}
                     </div>
                   </FormControl>
                   <FormMessage />
