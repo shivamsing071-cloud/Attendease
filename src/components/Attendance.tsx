@@ -120,8 +120,8 @@ const AttendanceSlot = ({ slot, status, onStatusChange }: { slot: SlotType, stat
                     className={cn(
                         "h-7 w-7 rounded-full",
                         status === 'present' 
-                            ? 'bg-green-500 hover:bg-green-600' 
-                            : 'hover:bg-white/30'
+                            ? 'bg-green-500 hover:bg-green-600 text-white' 
+                            : 'hover:bg-white/30 text-white/70'
                     )}
                     onClick={() => onStatusChange(status === 'present' ? 'none' : 'present')}
                 >
@@ -133,8 +133,8 @@ const AttendanceSlot = ({ slot, status, onStatusChange }: { slot: SlotType, stat
                     className={cn(
                         "h-7 w-7 rounded-full",
                         status === 'absent' 
-                            ? 'bg-red-500 hover:bg-red-600'
-                            : 'hover:bg-white/30'
+                            ? 'bg-red-500 hover:bg-red-600 text-white'
+                            : 'hover:bg-white/30 text-white/70'
                     )}
                     onClick={() => onStatusChange(status === 'absent' ? 'none' : 'absent')}
                 >
