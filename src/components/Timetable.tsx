@@ -5,7 +5,7 @@ import { generateTimeSlots } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SlotAssignmentDialog } from './SlotAssignmentDialog';
 import { Button } from '@/components/ui/button';
-import { GripVertical, Merge, Unplug, X } from 'lucide-react';
+import { GripVertical, Unplug } from 'lucide-react';
 import type { Slot as SlotType } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -17,10 +17,6 @@ export default function Timetable() {
   const timeSlots = useMemo(() => {
     return generateTimeSlots(settings.timeRange.start, settings.timeRange.end, 60);
   }, [settings.timeRange]);
-
-  const handleMerge = () => {
-    dispatch({ type: 'MERGE_SELECTED_SLOTS' });
-  };
   
   const handleUnmerge = (groupId: string) => {
     dispatch({ type: 'UNMERGE_SLOTS', payload: groupId });
@@ -107,22 +103,6 @@ export default function Timetable() {
           />
         )}
       </CardContent>
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
-        {mergeMode.enabled && mergeMode.selectedSlots.length > 1 && (
-            <Button onClick={handleMerge}>
-                <Merge className="mr-2 h-4 w-4" /> Merge {mergeMode.selectedSlots.length} slots
-            </Button>
-        )}
-        <Button
-            variant={mergeMode.enabled ? 'destructive' : 'default'}
-            onClick={() => dispatch({ type: 'TOGGLE_MERGE_MODE' })}
-            className="h-14 w-14 rounded-full shadow-lg"
-            size="icon"
-            aria-label={mergeMode.enabled ? 'Cancel Merge Mode' : 'Enable Merge Mode'}
-        >
-            {mergeMode.enabled ? <X className="h-6 w-6" /> : <Merge className="h-6 w-6" />}
-        </Button>
-      </div>
     </Card>
   );
 }

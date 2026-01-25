@@ -144,23 +144,20 @@ export default function Attendance() {
 const AttendanceSlot = ({ slot, status, onStatusChange, isMerged, mergeCount }: { slot: SlotType, status: AttendanceStatus, onStatusChange: (status: AttendanceStatus) => void, isMerged?: boolean, mergeCount?: number }) => {
     return (
         <div
-            className={cn(
-              "h-full w-full rounded-lg p-2 flex flex-col transition-all text-white",
-              isMerged ? 'justify-start' : 'justify-between'
-            )}
+            className="h-full w-full rounded-lg p-2 flex flex-col justify-between text-white"
             style={{ backgroundColor: slot.color }}
         >
             <div>
                 <p className="font-bold text-sm leading-tight">{slot.subject}</p>
                 <p className="text-xs opacity-80">{slot.type}</p>
             </div>
-            {isMerged && (
-                <div className="absolute bottom-1 right-1 flex items-center text-xs opacity-80">
-                    <GripVertical className="h-4 w-4 mr-1" />
-                    <span>{mergeCount} slots</span>
-                </div>
-            )}
-            <div className="flex justify-end gap-1 mt-auto">
+            <div className="flex justify-end items-center gap-1">
+                {isMerged && (
+                    <div className="flex items-center text-xs opacity-80 mr-auto">
+                        <GripVertical className="h-4 w-4 mr-1" />
+                        <span>{mergeCount} slots</span>
+                    </div>
+                )}
                 <Button
                     size="icon"
                     variant="ghost"
@@ -168,7 +165,7 @@ const AttendanceSlot = ({ slot, status, onStatusChange, isMerged, mergeCount }: 
                         "h-7 w-7 rounded-full",
                         status === 'present'
                             ? 'bg-green-500/90 hover:bg-green-600 text-white'
-                            : 'bg-white/30 hover:bg-white/50 text-white'
+                            : 'bg-white/20 hover:bg-white/40 text-white/80'
                     )}
                     onClick={() => onStatusChange(status === 'present' ? 'none' : 'present')}
                 >
@@ -181,7 +178,7 @@ const AttendanceSlot = ({ slot, status, onStatusChange, isMerged, mergeCount }: 
                       "h-7 w-7 rounded-full",
                       status === 'absent'
                           ? 'bg-red-500/90 hover:bg-red-600 text-white'
-                          : 'bg-white/30 hover:bg-white/50 text-white'
+                          : 'bg-white/20 hover:bg-white/40 text-white/80'
                   )}
                   onClick={() => onStatusChange(status === 'absent' ? 'none' : 'absent')}
                 >
