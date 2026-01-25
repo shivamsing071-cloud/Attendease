@@ -48,8 +48,6 @@ export default function Attendance() {
     return map;
   }, [slots]);
 
-  const renderedMergedGroupIds = new Set<string>();
-
   return (
     <Card>
       <CardHeader>
@@ -103,10 +101,10 @@ export default function Attendance() {
                     const mergedGroup = Object.values(slots).filter(s => s.mergedGroupId === slot.mergedGroupId);
                     const firstSlot = mergedGroup.sort((a,b) => a.startTime.localeCompare(b.startTime))[0];
                     if (slot.id !== firstSlot.id) {
-                      return null; // This is a subsequent slot in a merged group, don't render it
+                      // This is a subsequent slot in a merged group, render empty div to keep grid alignment
+                      return <div key={slotId} />; 
                     }
 
-                    renderedMergedGroupIds.add(slot.mergedGroupId);
                     const status = attendance[currentWeek]?.[firstSlot.id] || 'none';
                     return (
                       <div
@@ -128,7 +126,15 @@ export default function Attendance() {
                   if (!slot.subject) return <div key={slotId} className="bg-muted/20 rounded-lg" />;
 
                   const status = attendance[currentWeek]?.[slot.id] || 'none';
-                  return <AttendanceSlot key={slot.id} slot={slot} status={status} onStatusChange={(newStatus) => handleSetAttendance(slot.id, newStatus)} />;
+                  return (
+                    <div key={slot.id} className="relative h-full">
+                        <AttendanceSlot 
+                            slot={slot} 
+                            status={status} 
+                            onStatusChange={(newStatus) => handleSetAttendance(slot.id, newStatus)} 
+                        />
+                    </div>
+                  );
               }).filter(Boolean)}
             </Fragment>
           ))}
@@ -148,12 +154,14 @@ const AttendanceSlot = ({ slot, status, onStatusChange, isMerged, mergeCount }: 
                 <p className="font-bold text-sm leading-tight">{slot.subject}</p>
                 <p className="text-xs opacity-80">{slot.type}</p>
             </div>
-            <div className="flex justify-end items-center gap-1">
-                {isMerged && (
+            <div className="flex items-center gap-1">
+                {isMerged ? (
                     <div className="flex items-center text-xs opacity-80 mr-auto">
                         <GripVertical className="h-4 w-4 mr-1" />
                         <span>{mergeCount} slots</span>
                     </div>
+                ) : (
+                    <div className="mr-auto" />
                 )}
                 <Button
                     size="icon"
