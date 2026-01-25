@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, Fragment } from 'react';
 import { useAppContext } from '@/contexts/AppContext';
 import { generateTimeSlots } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,43 +26,15 @@ export default function Timetable() {
     dispatch({ type: 'UNMERGE_SLOTS', payload: groupId });
   };
 
-  const renderSlotsForDay = (day: string) => {
-    const daySlots = Object.values(slots).filter(s => s.day === day);
-    const renderedMergedGroupIds: string[] = [];
-
-    return timeSlots.map(({ startTime }, index) => {
-      const slot = daySlots.find(s => s.startTime === startTime);
-      if (!slot) return <div key={`${day}-${startTime}`}></div>;
-
-      if (slot.mergedGroupId) {
-        if (renderedMergedGroupIds.includes(slot.mergedGroupId)) {
-          return null; // Already rendered as part of a merged block
-        }
-
-        const mergedGroup = Object.values(slots).filter(s => s.mergedGroupId === slot.mergedGroupId);
-        renderedMergedGroupIds.push(slot.mergedGroupId);
-        const firstSlot = mergedGroup.sort((a,b) => a.startTime.localeCompare(b.startTime))[0];
-
-        return (
-          <div
-            key={firstSlot.id}
-            className="relative"
-            style={{ gridRow: `span ${mergedGroup.length}` }}
-          >
-             <Slot
-                slot={firstSlot}
-                isMerged={true}
-                mergeCount={mergedGroup.length}
-                onClick={() => setActiveSlot(firstSlot)}
-                onUnmerge={() => handleUnmerge(firstSlot.mergedGroupId!)}
-             />
-          </div>
-        );
-      }
-      
-      return <Slot key={slot.id} slot={slot} onClick={() => setActiveSlot(slot)} />;
+  const slotsMap = useMemo(() => {
+    const map = new Map<string, SlotType>();
+    Object.values(slots).forEach(slot => {
+      map.set(slot.id, slot);
     });
-  };
+    return map;
+  }, [slots]);
+
+  const renderedMergedGroupIds = new Set<string>();
 
   return (
     <Card>
@@ -95,17 +67,49 @@ export default function Timetable() {
             </div>
           ))}
 
-          {timeSlots.map(({ startTime, endTime }, index) => (
-            <>
-              <div key={startTime} className="flex items-center justify-center text-xs text-muted-foreground pr-2 text-right">
+          {timeSlots.map(({ startTime }) => (
+            <Fragment key={startTime}>
+              <div className="flex items-center justify-center text-xs text-muted-foreground pr-2 text-right">
                 {startTime}
               </div>
-              {renderSlotsForDay(settings.days[0]).filter(s => (s as React.ReactElement)?.key?.toString().includes(startTime))}
-              {renderSlotsForDay(settings.days[1]).filter(s => (s as React.ReactElement)?.key?.toString().includes(startTime))}
-              {renderSlotsForDay(settings.days[2]).filter(s => (s as React.ReactElement)?.key?.toString().includes(startTime))}
-              {renderSlotsForDay(settings.days[3]).filter(s => (s as React.ReactElement)?.key?.toString().includes(startTime))}
-              {renderSlotsForDay(settings.days[4]).filter(s => (s as React.ReactElement)?.key?.toString().includes(startTime))}
-            </>
+              {settings.days.map(day => {
+                const slotId = `${day.toLowerCase()}-${startTime.replace(':', '')}`;
+                const slot = slotsMap.get(slotId);
+
+                if (!slot) return <div key={slotId} />;
+
+                if (slot.mergedGroupId) {
+                  if (renderedMergedGroupIds.has(slot.mergedGroupId)) {
+                    return null; // Already rendered as part of a merged block
+                  }
+
+                  const mergedGroup = Object.values(slots).filter(s => s.mergedGroupId === slot.mergedGroupId);
+                  const firstSlot = mergedGroup.sort((a,b) => a.startTime.localeCompare(b.startTime))[0];
+
+                  if (firstSlot.id === slot.id) {
+                    renderedMergedGroupIds.add(slot.mergedGroupId);
+                    return (
+                      <div
+                        key={firstSlot.id}
+                        className="relative"
+                        style={{ gridRow: `span ${mergedGroup.length}` }}
+                      >
+                         <Slot
+                            slot={firstSlot}
+                            isMerged={true}
+                            mergeCount={mergedGroup.length}
+                            onClick={() => setActiveSlot(firstSlot)}
+                            onUnmerge={(e) => { e.stopPropagation(); handleUnmerge(firstSlot.mergedGroupId!); }}
+                         />
+                      </div>
+                    );
+                  }
+                  return null;
+                }
+                
+                return <Slot key={slot.id} slot={slot} onClick={() => setActiveSlot(slot)} />;
+              })}
+            </Fragment>
           ))}
         </div>
 
@@ -121,7 +125,7 @@ export default function Timetable() {
   );
 }
 
-const Slot = ({ slot, isMerged, mergeCount, onClick, onUnmerge }: { slot: SlotType, isMerged?: boolean, mergeCount?: number, onClick: () => void, onUnmerge?: () => void }) => {
+const Slot = ({ slot, isMerged, mergeCount, onClick, onUnmerge }: { slot: SlotType, isMerged?: boolean, mergeCount?: number, onClick: () => void, onUnmerge?: (e: React.MouseEvent) => void }) => {
     const { state, dispatch } = useAppContext();
     const { mergeMode } = state;
     const isSelectedForMerge = mergeMode.enabled && mergeMode.selectedSlots.includes(slot.id);
@@ -153,7 +157,7 @@ const Slot = ({ slot, isMerged, mergeCount, onClick, onUnmerge }: { slot: SlotTy
                         <p className="text-xs opacity-80">{slot.type}</p>
                     </div>
                     {isMerged && onUnmerge && (
-                      <Button variant="ghost" size="icon" className="absolute top-1 right-1 h-6 w-6 text-white hover:bg-white/20 hover:text-white" onClick={(e) => { e.stopPropagation(); onUnmerge(); }}>
+                      <Button variant="ghost" size="icon" className="absolute top-1 right-1 h-6 w-6 text-white hover:bg-white/20 hover:text-white" onClick={(e) => { e.stopPropagation(); onUnmerge(e); }}>
                         <Unplug className="h-4 w-4" />
                       </Button>
                     )}
