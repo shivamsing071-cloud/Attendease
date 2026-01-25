@@ -27,12 +27,7 @@ export default function Settings() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Application Settings</CardTitle>
-        <CardDescription>Manage your application data and settings.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="space-y-4 pt-6">
         <Card className="border-destructive">
             <CardHeader>
                 <CardTitle className="text-destructive">Danger Zone</CardTitle>
@@ -61,7 +56,6 @@ export default function Settings() {
                 </AlertDialog>
             </CardContent>
         </Card>
-      </CardContent>
-    </Card>
+      </div>
   );
 }

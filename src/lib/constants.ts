@@ -39,4 +39,5 @@ export const INITIAL_STATE: AppState = {
     enabled: false,
     selectedSlots: [],
   },
+  isSettingsOpen: false,
 };

@@ -107,7 +107,7 @@ export default function Timetable() {
           />
         )}
       </CardContent>
-      <div className="absolute bottom-6 right-6 flex flex-col items-end gap-2">
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
         {mergeMode.enabled && mergeMode.selectedSlots.length > 1 && (
             <Button onClick={handleMerge}>
                 <Merge className="mr-2 h-4 w-4" /> Merge {mergeMode.selectedSlots.length} slots

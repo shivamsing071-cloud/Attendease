@@ -73,8 +73,12 @@ const appReducer = (state: AppState, action: Action): AppState => {
     }
     case 'UPDATE_SETTINGS':
         return { ...state, settings: { ...state.settings, ...action.payload } };
+    case 'SET_SETTINGS_OPEN':
+        return { ...state, isSettingsOpen: action.payload };
     case 'RESET_STATE':
-        return INITIAL_STATE;
+        const resetState = { ...INITIAL_STATE, isSettingsOpen: false };
+        localStorage.setItem('attendease_state', JSON.stringify(resetState));
+        return resetState;
     default:
       return state;
   }
@@ -87,7 +91,9 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const storedState = localStorage.getItem('attendease_state');
       if (storedState) {
-        dispatch({ type: 'SET_STATE', payload: JSON.parse(storedState) });
+        const parsedState = JSON.parse(storedState);
+        parsedState.isSettingsOpen = false; // Ensure settings is closed on load
+        dispatch({ type: 'SET_STATE', payload: parsedState });
       }
     } catch (error) {
         console.error("Failed to load state from localStorage", error);

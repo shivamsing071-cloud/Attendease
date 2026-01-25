@@ -33,6 +33,7 @@ export interface AppState {
   attendance: AllAttendance;
   settings: AppSettings;
   mergeMode: MergeMode;
+  isSettingsOpen: boolean;
 }
 
 export type Action =
@@ -47,4 +48,5 @@ export type Action =
   | { type: 'SET_BULK_ATTENDANCE'; payload: { weekId: string; status: AttendanceStatus } }
   | { type: 'CLEAR_WEEK_ATTENDANCE'; payload: { weekId: string } }
   | { type: 'UPDATE_SETTINGS'; payload: Partial<AppSettings> }
+  | { type: 'SET_SETTINGS_OPEN'; payload: boolean }
   | { type: 'RESET_STATE' };
