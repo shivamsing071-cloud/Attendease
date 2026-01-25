@@ -30,8 +30,6 @@ export default function Timetable() {
     return map;
   }, [slots]);
 
-  const renderedMergedGroupIds = new Set<string>();
-
   return (
     <Card className="relative">
       <CardHeader>
@@ -61,36 +59,32 @@ export default function Timetable() {
                 if (!slot) return <div key={slotId} />;
 
                 if (slot.mergedGroupId) {
-                  if (renderedMergedGroupIds.has(slot.mergedGroupId)) {
-                    return null; // Already rendered as part of a merged block
-                  }
-
                   const mergedGroup = Object.values(slots).filter(s => s.mergedGroupId === slot.mergedGroupId);
                   const firstSlot = mergedGroup.sort((a,b) => a.startTime.localeCompare(b.startTime))[0];
 
-                  if (firstSlot.id === slot.id) {
-                    renderedMergedGroupIds.add(slot.mergedGroupId);
-                    return (
-                      <div
-                        key={firstSlot.id}
-                        className="relative"
-                        style={{ gridRow: `span ${mergedGroup.length}` }}
-                      >
-                         <Slot
-                            slot={firstSlot}
-                            isMerged={true}
-                            mergeCount={mergedGroup.length}
-                            onClick={() => setActiveSlot(firstSlot)}
-                            onUnmerge={(e) => { e.stopPropagation(); handleUnmerge(firstSlot.mergedGroupId!); }}
-                         />
-                      </div>
-                    );
+                  if (slot.id !== firstSlot.id) {
+                    return null; // Don't render subsequent slots in a merged group
                   }
-                  return null;
+
+                  return (
+                    <div
+                      key={firstSlot.id}
+                      className="relative"
+                      style={{ gridRow: `span ${mergedGroup.length}` }}
+                    >
+                        <Slot
+                          slot={firstSlot}
+                          isMerged={true}
+                          mergeCount={mergedGroup.length}
+                          onClick={() => setActiveSlot(firstSlot)}
+                          onUnmerge={(e) => { e.stopPropagation(); handleUnmerge(firstSlot.mergedGroupId!); }}
+                        />
+                    </div>
+                  );
                 }
                 
                 return <Slot key={slot.id} slot={slot} onClick={() => setActiveSlot(slot)} />;
-              })}
+              }).filter(Boolean)}
             </Fragment>
           ))}
         </div>

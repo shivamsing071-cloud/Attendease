@@ -99,40 +99,37 @@ export default function Attendance() {
                   
                   if (!slot) return <div key={slotId} />;
 
-                  if (!slot.subject) return <div key={slotId} className="bg-muted/20 rounded-lg" />;
-
                   if (slot.mergedGroupId) {
-                    if (renderedMergedGroupIds.has(slot.mergedGroupId)) {
-                      return null; // Already rendered
-                    }
                     const mergedGroup = Object.values(slots).filter(s => s.mergedGroupId === slot.mergedGroupId);
-                    const firstSlot = mergedGroup.sort((a, b) => a.startTime.localeCompare(b.startTime))[0];
-
-                    if (firstSlot.id === slot.id) {
-                      renderedMergedGroupIds.add(slot.mergedGroupId);
-                      const status = attendance[currentWeek]?.[firstSlot.id] || 'none';
-                      return (
-                        <div
-                          key={firstSlot.id}
-                          className="relative"
-                          style={{ gridRow: `span ${mergedGroup.length}` }}
-                        >
-                          <AttendanceSlot
-                            slot={firstSlot}
-                            status={status}
-                            onStatusChange={(newStatus) => handleSetAttendance(firstSlot.id, newStatus)}
-                            isMerged={true}
-                            mergeCount={mergedGroup.length}
-                          />
-                        </div>
-                      );
+                    const firstSlot = mergedGroup.sort((a,b) => a.startTime.localeCompare(b.startTime))[0];
+                    if (slot.id !== firstSlot.id) {
+                      return null; // This is a subsequent slot in a merged group, don't render it
                     }
-                    return null;
+
+                    renderedMergedGroupIds.add(slot.mergedGroupId);
+                    const status = attendance[currentWeek]?.[firstSlot.id] || 'none';
+                    return (
+                      <div
+                        key={firstSlot.id}
+                        className="relative"
+                        style={{ gridRow: `span ${mergedGroup.length}` }}
+                      >
+                        <AttendanceSlot
+                          slot={firstSlot}
+                          status={status}
+                          onStatusChange={(newStatus) => handleSetAttendance(firstSlot.id, newStatus)}
+                          isMerged={true}
+                          mergeCount={mergedGroup.length}
+                        />
+                      </div>
+                    );
                   }
+
+                  if (!slot.subject) return <div key={slotId} className="bg-muted/20 rounded-lg" />;
 
                   const status = attendance[currentWeek]?.[slot.id] || 'none';
                   return <AttendanceSlot key={slot.id} slot={slot} status={status} onStatusChange={(newStatus) => handleSetAttendance(slot.id, newStatus)} />;
-              })}
+              }).filter(Boolean)}
             </Fragment>
           ))}
         </div>
