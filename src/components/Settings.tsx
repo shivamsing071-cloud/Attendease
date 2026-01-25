@@ -38,7 +38,7 @@ export default function Settings() {
                 <AlertDialogTrigger asChild>
                     <Button variant="destructive">
                         <Trash2 className="mr-2 h-4 w-4" />
-                        Clear All Timetable Data
+                        Clear All Data
                     </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>

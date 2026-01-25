@@ -1,7 +1,7 @@
 'use client';
 import { useState, useMemo, Fragment } from 'react';
 import { useAppContext } from '@/contexts/AppContext';
-import { generateTimeSlots, getWeekId, getWeekOptions, getWeekDates } from '@/lib/utils';
+import { generateTimeSlots, getWeekId, getWeekOptions } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -121,7 +121,7 @@ const AttendanceSlot = ({ slot, status, onStatusChange }: { slot: SlotType, stat
                         "h-7 w-7 rounded-full",
                         status === 'present' 
                             ? 'bg-green-500 hover:bg-green-600 text-white' 
-                            : 'bg-white/25 hover:bg-white/40 text-white'
+                            : 'bg-black/20 hover:bg-black/40 text-white'
                     )}
                     onClick={() => onStatusChange(status === 'present' ? 'none' : 'present')}
                 >
@@ -134,7 +134,7 @@ const AttendanceSlot = ({ slot, status, onStatusChange }: { slot: SlotType, stat
                         "h-7 w-7 rounded-full",
                         status === 'absent' 
                             ? 'bg-red-500 hover:bg-red-600 text-white'
-                            : 'bg-white/25 hover:bg-white/40 text-white'
+                            : 'bg-black/20 hover:bg-black/40 text-white'
                     )}
                     onClick={() => onStatusChange(status === 'absent' ? 'none' : 'absent')}
                 >
