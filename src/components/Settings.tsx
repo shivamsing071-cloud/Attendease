@@ -16,12 +16,32 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Trash2 } from 'lucide-react';
+import { useFirebase, deleteDocumentNonBlocking } from '@/firebase';
+import { collection, doc } from 'firebase/firestore';
 
 export default function Settings() {
-  const { dispatch } = useAppContext();
+  const { state, dispatch } = useAppContext();
+  const { firestore } = useFirebase();
   const [isResetAlertOpen, setIsResetAlertOpen] = useState(false);
 
   const handleReset = () => {
+    if (!firestore) return;
+
+    // Delete all holidays from Firestore
+    const holidaysCollection = collection(firestore, 'holidays');
+    Object.keys(state.holidays).forEach(holidayId => {
+        const holidayRef = doc(holidaysCollection, holidayId);
+        deleteDocumentNonBlocking(holidayRef);
+    });
+
+    // Delete all extra classes from Firestore
+    const extraClassesCollection = collection(firestore, 'extraClasses');
+    Object.keys(state.extraClasses).forEach(extraClassId => {
+        const extraClassRef = doc(extraClassesCollection, extraClassId);
+        deleteDocumentNonBlocking(extraClassRef);
+    });
+    
+    // Reset local state
     dispatch({ type: 'RESET_STATE' });
     setIsResetAlertOpen(false);
   };
@@ -45,7 +65,7 @@ export default function Settings() {
                     <AlertDialogHeader>
                     <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This will permanently delete all your timetable slots, attendance records, and settings. This action cannot be undone.
+                        This will permanently delete all your timetable slots, attendance records, holidays, extra classes, and settings from this device and from the cloud. This action cannot be undone.
                     </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
