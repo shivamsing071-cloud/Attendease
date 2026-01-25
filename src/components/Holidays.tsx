@@ -25,14 +25,14 @@ export default function Holidays() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
                 <CardTitle>Holiday Manager</CardTitle>
                 <CardDescription>
                 Add, view, or remove holidays.
                 </CardDescription>
             </div>
-            <Button onClick={() => setIsDialogOpen(true)}>
+            <Button onClick={() => setIsDialogOpen(true)} className="w-full sm:w-auto">
                 <PlusCircle className="mr-2 h-4 w-4" /> Add Holiday
             </Button>
         </div>
