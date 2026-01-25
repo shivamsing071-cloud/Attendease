@@ -55,7 +55,7 @@
 
 @layer base {
   body {
-    @apply bg-background text-foreground border-border;
+    @apply bg-background text-foreground;
   }
 }
 
