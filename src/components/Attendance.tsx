@@ -5,7 +5,7 @@ import { generateTimeSlots, getWeekId, getWeekOptions } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Check, X, CircleSlash } from 'lucide-react';
+import { Check, X, CircleSlash, GripVertical } from 'lucide-react';
 import type { Slot as SlotType, AttendanceStatus } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -21,7 +21,15 @@ export default function Attendance() {
   const weekOptions = useMemo(() => getWeekOptions(settings.semesterStart), [settings.semesterStart]);
 
   const handleSetAttendance = (slotId: string, status: AttendanceStatus) => {
-    dispatch({ type: 'SET_ATTENDANCE', payload: { weekId: currentWeek, slotId, status } });
+    const slot = state.slots[slotId];
+    if (slot && slot.mergedGroupId) {
+      const groupSlots = Object.values(state.slots).filter(s => s.mergedGroupId === slot.mergedGroupId);
+      groupSlots.forEach(s => {
+        dispatch({ type: 'SET_ATTENDANCE', payload: { weekId: currentWeek, slotId: s.id, status } });
+      });
+    } else {
+      dispatch({ type: 'SET_ATTENDANCE', payload: { weekId: currentWeek, slotId, status } });
+    }
   };
   
   const handleBulkAction = (status: AttendanceStatus) => {
@@ -32,18 +40,15 @@ export default function Attendance() {
     dispatch({ type: 'CLEAR_WEEK_ATTENDANCE', payload: { weekId: currentWeek } });
   }
 
-  const renderSlotsForDay = (day: string) => {
-    const daySlots = Object.values(slots).filter(s => s.day === day);
-
-    return daySlots.map(slot => {
-        if (!slot.subject) {
-            return <div key={slot.id} className="bg-muted/30 rounded-lg"></div>;
-        }
-
-        const status = attendance[currentWeek]?.[slot.id] || 'none';
-        return <AttendanceSlot key={slot.id} slot={slot} status={status} onStatusChange={(newStatus) => handleSetAttendance(slot.id, newStatus)} />;
+  const slotsMap = useMemo(() => {
+    const map = new Map<string, SlotType>();
+    Object.values(slots).forEach(slot => {
+      map.set(slot.id, slot);
     });
-  };
+    return map;
+  }, [slots]);
+
+  const renderedMergedGroupIds = new Set<string>();
 
   return (
     <Card>
@@ -90,8 +95,41 @@ export default function Attendance() {
               </div>
               {settings.days.map(day => {
                   const slotId = `${day.toLowerCase()}-${startTime.replace(':', '')}`;
-                  const slot = slots[slotId];
-                  if (!slot || !slot.subject) return <div key={slotId} className="bg-muted/20 rounded-lg" />;
+                  const slot = slotsMap.get(slotId);
+                  
+                  if (!slot) return <div key={slotId} />;
+
+                  if (!slot.subject) return <div key={slotId} className="bg-muted/20 rounded-lg" />;
+
+                  if (slot.mergedGroupId) {
+                    if (renderedMergedGroupIds.has(slot.mergedGroupId)) {
+                      return null; // Already rendered
+                    }
+                    const mergedGroup = Object.values(slots).filter(s => s.mergedGroupId === slot.mergedGroupId);
+                    const firstSlot = mergedGroup.sort((a, b) => a.startTime.localeCompare(b.startTime))[0];
+
+                    if (firstSlot.id === slot.id) {
+                      renderedMergedGroupIds.add(slot.mergedGroupId);
+                      const status = attendance[currentWeek]?.[firstSlot.id] || 'none';
+                      return (
+                        <div
+                          key={firstSlot.id}
+                          className="relative"
+                          style={{ gridRow: `span ${mergedGroup.length}` }}
+                        >
+                          <AttendanceSlot
+                            slot={firstSlot}
+                            status={status}
+                            onStatusChange={(newStatus) => handleSetAttendance(firstSlot.id, newStatus)}
+                            isMerged={true}
+                            mergeCount={mergedGroup.length}
+                          />
+                        </div>
+                      );
+                    }
+                    return null;
+                  }
+
                   const status = attendance[currentWeek]?.[slot.id] || 'none';
                   return <AttendanceSlot key={slot.id} slot={slot} status={status} onStatusChange={(newStatus) => handleSetAttendance(slot.id, newStatus)} />;
               })}
@@ -103,40 +141,49 @@ export default function Attendance() {
   );
 }
 
-const AttendanceSlot = ({ slot, status, onStatusChange }: { slot: SlotType, status: AttendanceStatus, onStatusChange: (status: AttendanceStatus) => void }) => {
+const AttendanceSlot = ({ slot, status, onStatusChange, isMerged, mergeCount }: { slot: SlotType, status: AttendanceStatus, onStatusChange: (status: AttendanceStatus) => void, isMerged?: boolean, mergeCount?: number }) => {
     return (
         <div
-            className="h-full w-full rounded-lg p-2 flex flex-col justify-between transition-all text-white"
+            className={cn(
+              "h-full w-full rounded-lg p-2 flex flex-col transition-all text-white",
+              isMerged ? 'justify-start' : 'justify-between'
+            )}
             style={{ backgroundColor: slot.color }}
         >
             <div>
                 <p className="font-bold text-sm leading-tight">{slot.subject}</p>
                 <p className="text-xs opacity-80">{slot.type}</p>
             </div>
-            <div className="flex justify-end gap-1">
+            {isMerged && (
+                <div className="absolute bottom-1 right-1 flex items-center text-xs opacity-80">
+                    <GripVertical className="h-4 w-4 mr-1" />
+                    <span>{mergeCount} slots</span>
+                </div>
+            )}
+            <div className="flex justify-end gap-1 mt-auto">
                 <Button
                     size="icon"
                     variant="ghost"
                     className={cn(
                         "h-7 w-7 rounded-full",
-                        status === 'present' 
-                            ? 'bg-green-500 hover:bg-green-600 text-white' 
-                            : 'bg-black/20 hover:bg-black/40 text-white'
+                        status === 'present'
+                            ? 'bg-green-500/90 hover:bg-green-600 text-white'
+                            : 'bg-white/30 hover:bg-white/50 text-white'
                     )}
                     onClick={() => onStatusChange(status === 'present' ? 'none' : 'present')}
                 >
                     <Check className="h-5 w-5" />
                 </Button>
                 <Button
-                    size="icon"
-                    variant="ghost"
-                    className={cn(
-                        "h-7 w-7 rounded-full",
-                        status === 'absent' 
-                            ? 'bg-red-500 hover:bg-red-600 text-white'
-                            : 'bg-black/20 hover:bg-black/40 text-white'
-                    )}
-                    onClick={() => onStatusChange(status === 'absent' ? 'none' : 'absent')}
+                  size="icon"
+                  variant="ghost"
+                  className={cn(
+                      "h-7 w-7 rounded-full",
+                      status === 'absent'
+                          ? 'bg-red-500/90 hover:bg-red-600 text-white'
+                          : 'bg-white/30 hover:bg-white/50 text-white'
+                  )}
+                  onClick={() => onStatusChange(status === 'absent' ? 'none' : 'absent')}
                 >
                     <X className="h-5 w-5" />
                 </Button>
