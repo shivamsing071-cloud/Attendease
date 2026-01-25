@@ -142,7 +142,6 @@ export function ExtraClassDialog({ isOpen, onClose, extraClass }: ExtraClassDial
                         selected={field.value}
                         onSelect={field.onChange}
                         initialFocus
-                        className="min-w-max"
                       />
                     </PopoverContent>
                   </Popover>

@@ -106,7 +106,6 @@ export function HolidayDialog({ isOpen, onClose }: HolidayDialogProps) {
                           date > new Date(new Date().setFullYear(new Date().getFullYear() + 1)) || date < new Date("1900-01-01")
                         }
                         initialFocus
-                        className="min-w-max"
                       />
                     </PopoverContent>
                   </Popover>
