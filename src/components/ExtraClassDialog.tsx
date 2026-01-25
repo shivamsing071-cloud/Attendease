@@ -136,12 +136,13 @@ export function ExtraClassDialog({ isOpen, onClose, extraClass }: ExtraClassDial
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="p-0" align="start">
+                    <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
                         initialFocus
+                        className="min-w-max"
                       />
                     </PopoverContent>
                   </Popover>

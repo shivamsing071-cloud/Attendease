@@ -97,7 +97,7 @@ export function HolidayDialog({ isOpen, onClose }: HolidayDialogProps) {
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="p-0" align="start">
+                    <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
                         mode="single"
                         selected={field.value}
@@ -106,6 +106,7 @@ export function HolidayDialog({ isOpen, onClose }: HolidayDialogProps) {
                           date > new Date(new Date().setFullYear(new Date().getFullYear() + 1)) || date < new Date("1900-01-01")
                         }
                         initialFocus
+                        className="min-w-max"
                       />
                     </PopoverContent>
                   </Popover>
