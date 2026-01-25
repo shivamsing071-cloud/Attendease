@@ -1,5 +1,5 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, Fragment } from 'react';
 import { useAppContext } from '@/contexts/AppContext';
 import { generateTimeSlots, getWeekId, getWeekOptions, getWeekDates } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -84,8 +84,8 @@ export default function Attendance() {
           ))}
 
           {timeSlots.map(({ startTime }) => (
-            <>
-              <div key={startTime} className="flex items-center justify-center text-xs text-muted-foreground pr-2 text-right">
+            <Fragment key={startTime}>
+              <div className="flex items-center justify-center text-xs text-muted-foreground pr-2 text-right">
                 {startTime}
               </div>
               {settings.days.map(day => {
@@ -95,7 +95,7 @@ export default function Attendance() {
                   const status = attendance[currentWeek]?.[slot.id] || 'none';
                   return <AttendanceSlot key={slot.id} slot={slot} status={status} onStatusChange={(newStatus) => handleSetAttendance(slot.id, newStatus)} />;
               })}
-            </>
+            </Fragment>
           ))}
         </div>
       </CardContent>
