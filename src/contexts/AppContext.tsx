@@ -1,8 +1,10 @@
 'use client';
 import { createContext, useContext, useReducer, useEffect, type Dispatch } from 'react';
-import type { AppState, Action } from '@/lib/types';
+import type { AppState, Action, Holiday, ExtraClass } from '@/lib/types';
 import { INITIAL_STATE } from '@/lib/constants';
 import { v4 as uuidv4 } from 'uuid';
+import { useCollection, useFirebase, useMemoFirebase } from '@/firebase';
+import { collection } from 'firebase/firestore';
 
 const AppContext = createContext<{ state: AppState; dispatch: Dispatch<Action> } | undefined>(undefined);
 
@@ -79,6 +81,20 @@ const appReducer = (state: AppState, action: Action): AppState => {
         const resetState = { ...INITIAL_STATE, isSettingsOpen: false };
         localStorage.setItem('attendease_state', JSON.stringify(resetState));
         return resetState;
+    case 'SET_HOLIDAYS': {
+        const holidaysRecord = action.payload.reduce((acc, holiday) => {
+            acc[holiday.id] = holiday;
+            return acc;
+        }, {} as Record<string, Holiday>);
+        return { ...state, holidays: holidaysRecord };
+    }
+    case 'SET_EXTRA_CLASSES': {
+        const extraClassesRecord = action.payload.reduce((acc, extraClass) => {
+            acc[extraClass.id] = extraClass;
+            return acc;
+        }, {} as Record<string, ExtraClass>);
+        return { ...state, extraClasses: extraClassesRecord };
+    }
     default:
       return state;
   }
@@ -86,6 +102,33 @@ const appReducer = (state: AppState, action: Action): AppState => {
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(appReducer, INITIAL_STATE);
+  const { firestore, user } = useFirebase();
+
+  // fetch holidays
+  const holidaysCollection = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return collection(firestore, 'holidays');
+  }, [firestore, user]);
+  const { data: holidaysData } = useCollection<Holiday>(holidaysCollection);
+
+  // fetch extra classes
+  const extraClassesCollection = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return collection(firestore, 'extraClasses');
+  }, [firestore, user]);
+  const { data: extraClassesData } = useCollection<ExtraClass>(extraClassesCollection);
+
+  useEffect(() => {
+    if(holidaysData) {
+        dispatch({ type: 'SET_HOLIDAYS', payload: holidaysData });
+    }
+  }, [holidaysData]);
+
+  useEffect(() => {
+    if(extraClassesData) {
+        dispatch({ type: 'SET_EXTRA_CLASSES', payload: extraClassesData });
+    }
+  }, [extraClassesData]);
 
   useEffect(() => {
     try {

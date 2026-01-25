@@ -6,6 +6,8 @@ import Timetable from '@/components/Timetable';
 import Dashboard from '@/components/Dashboard';
 import Attendance from '@/components/Attendance';
 import Settings from '@/components/Settings';
+import Holidays from '@/components/Holidays';
+import ExtraClasses from '@/components/ExtraClasses';
 import { useAppContext } from '@/contexts/AppContext';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -20,10 +22,12 @@ export default function Home() {
       <Header />
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 md:w-[400px]">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
             <TabsTrigger value="timetable">Timetable</TabsTrigger>
             <TabsTrigger value="attendance">Attendance</TabsTrigger>
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="holidays">Holidays</TabsTrigger>
+            <TabsTrigger value="extra-classes">Extra Classes</TabsTrigger>
           </TabsList>
           <TabsContent value="timetable">
             <Timetable />
@@ -33,6 +37,12 @@ export default function Home() {
           </TabsContent>
           <TabsContent value="dashboard">
             <Dashboard />
+          </TabsContent>
+          <TabsContent value="holidays">
+            <Holidays />
+          </TabsContent>
+          <TabsContent value="extra-classes">
+            <ExtraClasses />
           </TabsContent>
         </Tabs>
         <Sheet open={state.isSettingsOpen} onOpenChange={(isOpen) => dispatch({ type: 'SET_SETTINGS_OPEN', payload: isOpen })}>

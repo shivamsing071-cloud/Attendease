@@ -28,12 +28,33 @@ export interface MergeMode {
   selectedSlots: string[];
 }
 
+export type HolidayType = 'National' | 'University' | 'Personal';
+
+export interface Holiday {
+  id: string;
+  date: string; // YYYY-MM-DD
+  name: string;
+  type: HolidayType;
+}
+
+export interface ExtraClass {
+  id: string;
+  date: string; // YYYY-MM-DD
+  startTime: string;
+  endTime: string;
+  subject: string;
+  type: SlotType;
+  attended: boolean;
+}
+
 export interface AppState {
   slots: Record<string, Slot>;
   attendance: AllAttendance;
   settings: AppSettings;
   mergeMode: MergeMode;
   isSettingsOpen: boolean;
+  holidays: Record<string, Holiday>;
+  extraClasses: Record<string, ExtraClass>;
 }
 
 export type Action =
@@ -49,4 +70,6 @@ export type Action =
   | { type: 'CLEAR_WEEK_ATTENDANCE'; payload: { weekId: string } }
   | { type: 'UPDATE_SETTINGS'; payload: Partial<AppSettings> }
   | { type: 'SET_SETTINGS_OPEN'; payload: boolean }
-  | { type: 'RESET_STATE' };
+  | { type: 'RESET_STATE' }
+  | { type: 'SET_HOLIDAYS'; payload: Holiday[] }
+  | { type: 'SET_EXTRA_CLASSES'; payload: ExtraClass[] };

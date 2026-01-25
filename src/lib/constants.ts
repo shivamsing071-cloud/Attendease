@@ -40,4 +40,6 @@ export const INITIAL_STATE: AppState = {
     selectedSlots: [],
   },
   isSettingsOpen: false,
+  holidays: {},
+  extraClasses: {},
 };
