@@ -44,18 +44,29 @@ export const getWeekOptions = (semesterStart: string) => {
   const start = new Date(semesterStart);
   const end = new Date();
   end.setDate(end.getDate() + 14); // Add 2 future weeks
-  const options = [];
+  
+  const groupedOptions: { month: string; weeks: { value: string; label: string }[] }[] = [];
   let current = startOfWeek(start, { weekStartsOn: 1 });
 
   while (current <= end) {
       const weekId = getWeekId(current);
       const weekDates = getWeekDates(weekId);
       const weekLabel = `${format(weekDates[0], 'MMM d')} - ${format(weekDates[6], 'MMM d, yyyy')}`;
-      options.push({ value: weekId, label: weekLabel });
+      const monthLabel = format(weekDates[0], 'MMMM yyyy');
+
+      let monthGroup = groupedOptions.find(g => g.month === monthLabel);
+
+      if (!monthGroup) {
+          monthGroup = { month: monthLabel, weeks: [] };
+          groupedOptions.push(monthGroup);
+      }
+      
+      monthGroup.weeks.push({ value: weekId, label: weekLabel });
       current = addDays(current, 7);
   }
-
-  return options.reverse();
+  
+  groupedOptions.forEach(group => group.weeks.reverse());
+  return groupedOptions.reverse();
 };
 
 export const formatSlotsForAI = (slots: Record<string, Slot>): string => {
