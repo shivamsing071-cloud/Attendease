@@ -47,6 +47,25 @@ export interface ExtraClass {
   attended: boolean;
 }
 
+export interface Cancellation {
+  id: string;
+  date: string; // YYYY-MM-DD
+  slotId: string;
+  subject: string;
+  reason: string;
+  createdAt: number; // Timestamp
+}
+
+export type SemesterBreakType = 'Midsem' | 'Endsem' | 'Vacation';
+
+export interface SemesterBreak {
+  id: string;
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
+  name: string;
+  type: SemesterBreakType;
+}
+
 export interface AppState {
   slots: Record<string, Slot>;
   attendance: AllAttendance;
@@ -55,6 +74,8 @@ export interface AppState {
   isSettingsOpen: boolean;
   holidays: Record<string, Holiday>;
   extraClasses: Record<string, ExtraClass>;
+  cancellations: Record<string, Cancellation>;
+  semesterBreaks: Record<string, SemesterBreak>;
 }
 
 export type Action =
@@ -72,4 +93,8 @@ export type Action =
   | { type: 'SET_SETTINGS_OPEN'; payload: boolean }
   | { type: 'RESET_STATE' }
   | { type: 'SET_HOLIDAYS'; payload: Holiday[] }
-  | { type: 'SET_EXTRA_CLASSES'; payload: ExtraClass[] };
+  | { type: 'SET_EXTRA_CLASSES'; payload: ExtraClass[] }
+  | { type: 'SET_CANCELLATIONS'; payload: Cancellation[] }
+  | { type: 'ADD_CANCELLATION'; payload: Cancellation }
+  | { type: 'DELETE_CANCELLATION'; payload: string }
+  | { type: 'SET_SEMESTER_BREAKS'; payload: SemesterBreak[] };

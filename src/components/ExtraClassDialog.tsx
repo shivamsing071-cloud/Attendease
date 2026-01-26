@@ -53,36 +53,36 @@ export function ExtraClassDialog({ isOpen, onClose, extraClass }: ExtraClassDial
       attended: true,
     },
   });
-  
+
   useEffect(() => {
-    if(isOpen) {
-        form.reset(extraClass ? {
-            ...extraClass,
-            date: new Date(extraClass.date)
-        } : {
-            subject: '',
-            type: 'Lecture',
-            attended: true,
-        });
+    if (isOpen) {
+      form.reset(extraClass ? {
+        ...extraClass,
+        date: new Date(extraClass.date)
+      } : {
+        subject: '',
+        type: 'Lecture',
+        attended: true,
+      });
     }
   }, [isOpen, extraClass, form])
 
   const onSubmit = (values: ExtraClassFormValues) => {
     const classData = {
-        ...values,
-        date: format(values.date, 'yyyy-MM-dd')
+      ...values,
+      date: format(values.date, 'yyyy-MM-dd')
     }
-    
+
     if (extraClass) {
-        const extraClassRef = doc(firestore, 'extraClasses', extraClass.id);
-        updateDocumentNonBlocking(extraClassRef, classData);
+      const extraClassRef = doc(firestore, 'extraClasses', extraClass.id);
+      updateDocumentNonBlocking(extraClassRef, classData);
     } else {
-        const extraClassesCollection = collection(firestore, 'extraClasses');
-        addDocumentNonBlocking(extraClassesCollection, classData);
+      const extraClassesCollection = collection(firestore, 'extraClasses');
+      addDocumentNonBlocking(extraClassesCollection, classData);
     }
     onClose();
   };
-  
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
@@ -97,7 +97,7 @@ export function ExtraClassDialog({ isOpen, onClose, extraClass }: ExtraClassDial
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Subject</FormLabel>
-                   <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a subject" />
@@ -111,13 +111,13 @@ export function ExtraClassDialog({ isOpen, onClose, extraClass }: ExtraClassDial
                 </FormItem>
               )}
             />
-             <FormField
+            <FormField
               control={form.control}
               name="date"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel>Date</FormLabel>
-                  <Popover>
+                  <Popover modal={true}>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
@@ -140,7 +140,8 @@ export function ExtraClassDialog({ isOpen, onClose, extraClass }: ExtraClassDial
                       <Calendar
                         mode="single"
                         selected={field.value}
-                        onSelect={field.onChange}
+                        onSelect={(date) => field.onChange(date)}
+                        required
                         initialFocus
                       />
                     </PopoverContent>
@@ -150,20 +151,20 @@ export function ExtraClassDialog({ isOpen, onClose, extraClass }: ExtraClassDial
               )}
             />
             <div className="grid grid-cols-2 gap-4">
-                <FormField
-                    control={form.control}
-                    name="startTime"
-                    render={({ field }) => (
-                        <FormItem><FormLabel>Start Time</FormLabel><FormControl><Input type="time" {...field} /></FormControl><FormMessage /></FormItem>
-                    )}
-                />
-                 <FormField
-                    control={form.control}
-                    name="endTime"
-                    render={({ field }) => (
-                        <FormItem><FormLabel>End Time</FormLabel><FormControl><Input type="time" {...field} /></FormControl><FormMessage /></FormItem>
-                    )}
-                />
+              <FormField
+                control={form.control}
+                name="startTime"
+                render={({ field }) => (
+                  <FormItem><FormLabel>Start Time</FormLabel><FormControl><Input type="time" {...field} /></FormControl><FormMessage /></FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="endTime"
+                render={({ field }) => (
+                  <FormItem><FormLabel>End Time</FormLabel><FormControl><Input type="time" {...field} /></FormControl><FormMessage /></FormItem>
+                )}
+              />
             </div>
             <FormField
               control={form.control}
@@ -187,26 +188,26 @@ export function ExtraClassDialog({ isOpen, onClose, extraClass }: ExtraClassDial
               )}
             />
             <FormField
-                control={form.control}
-                name="attended"
-                render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                    <div className="space-y-0.5">
-                        <FormLabel>Attended</FormLabel>
-                        <FormMessage />
-                    </div>
-                    <FormControl>
-                        <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        />
-                    </FormControl>
-                    </FormItem>
-                )}
+              control={form.control}
+              name="attended"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                  <div className="space-y-0.5">
+                    <FormLabel>Attended</FormLabel>
+                    <FormMessage />
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
             />
             <DialogFooter className="!mt-6">
-                <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-                <Button type="submit">Save Class</Button>
+              <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+              <Button type="submit">Save Class</Button>
             </DialogFooter>
           </form>
         </Form>

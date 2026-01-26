@@ -42,4 +42,6 @@ export const INITIAL_STATE: AppState = {
   isSettingsOpen: false,
   holidays: {},
   extraClasses: {},
+  cancellations: {},
+  semesterBreaks: {},
 };

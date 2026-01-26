@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { eachDayOfInterval, format, startOfWeek, addDays, getWeek } from 'date-fns';
-import type { Slot } from './types';
+import type { Slot, SemesterBreak } from './types';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -33,7 +33,7 @@ export const getWeekDates = (weekId: string): Date[] => {
   const firstDayOfYear = new Date(year, 0, 1);
   const days = (weekNumber - 1) * 7;
   const startDate = startOfWeek(addDays(firstDayOfYear, days), { weekStartsOn: 1 });
-  
+
   return eachDayOfInterval({
     start: startDate,
     end: addDays(startDate, 6),
@@ -42,29 +42,31 @@ export const getWeekDates = (weekId: string): Date[] => {
 
 export const getWeekOptions = (semesterStart: string) => {
   const start = new Date(semesterStart);
+  // Start from the beginning of the month
+  start.setDate(1);
   const end = new Date(start);
   end.setFullYear(start.getFullYear() + 1);
-  
+
   const groupedOptions: { month: string; weeks: { value: string; label: string }[] }[] = [];
   let current = startOfWeek(start, { weekStartsOn: 1 });
 
   while (current <= end) {
-      const weekId = getWeekId(current);
-      const weekDates = getWeekDates(weekId);
-      const weekLabel = `${format(weekDates[0], 'MMM d')} - ${format(weekDates[6], 'MMM d, yyyy')}`;
-      const monthLabel = format(weekDates[0], 'MMMM yyyy');
+    const weekId = getWeekId(current);
+    const weekDates = getWeekDates(weekId);
+    const weekLabel = `${format(weekDates[0], 'MMM d')} - ${format(weekDates[6], 'MMM d')}`;
+    const monthLabel = format(weekDates[0], 'MMMM');
 
-      let monthGroup = groupedOptions.find(g => g.month === monthLabel);
+    let monthGroup = groupedOptions.find(g => g.month === monthLabel);
 
-      if (!monthGroup) {
-          monthGroup = { month: monthLabel, weeks: [] };
-          groupedOptions.push(monthGroup);
-      }
-      
-      monthGroup.weeks.push({ value: weekId, label: weekLabel });
-      current = addDays(current, 7);
+    if (!monthGroup) {
+      monthGroup = { month: monthLabel, weeks: [] };
+      groupedOptions.push(monthGroup);
+    }
+
+    monthGroup.weeks.push({ value: weekId, label: weekLabel });
+    current = addDays(current, 7);
   }
-  
+
   return groupedOptions;
 };
 
@@ -78,3 +80,17 @@ export const formatSlotsForAI = (slots: Record<string, Slot>): string => {
 export const COLORS = [
   '#FD7E7E', '#B0E293', '#83C7FF', '#FFD882', '#A994FF', '#FF9ECE', '#7EDCE2', '#FFC3A0'
 ];
+
+/**
+ * Checks if a given date falls within any semester break.
+ * Returns the matching SemesterBreak if found, null otherwise.
+ */
+export const isDateInSemesterBreak = (date: Date, breaks: SemesterBreak[]): SemesterBreak | null => {
+  const dateStr = format(date, 'yyyy-MM-dd');
+  for (const semesterBreak of breaks) {
+    if (dateStr >= semesterBreak.startDate && dateStr <= semesterBreak.endDate) {
+      return semesterBreak;
+    }
+  }
+  return null;
+};

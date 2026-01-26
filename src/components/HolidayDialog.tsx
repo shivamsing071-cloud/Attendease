@@ -42,15 +42,15 @@ export function HolidayDialog({ isOpen, onClose }: HolidayDialogProps) {
 
   const onSubmit = (values: HolidayFormValues) => {
     const holidayData = {
-        ...values,
-        date: format(values.date, 'yyyy-MM-dd')
+      ...values,
+      date: format(values.date, 'yyyy-MM-dd')
     }
     const holidaysCollection = collection(firestore, 'holidays');
     addDocumentNonBlocking(holidaysCollection, holidayData);
     form.reset();
     onClose();
   };
-  
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
@@ -72,13 +72,13 @@ export function HolidayDialog({ isOpen, onClose }: HolidayDialogProps) {
                 </FormItem>
               )}
             />
-             <FormField
+            <FormField
               control={form.control}
               name="date"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel>Date</FormLabel>
-                  <Popover>
+                  <Popover modal={true}>
                     <PopoverTrigger asChild>
                       <FormControl>
                         <Button
@@ -101,7 +101,8 @@ export function HolidayDialog({ isOpen, onClose }: HolidayDialogProps) {
                       <Calendar
                         mode="single"
                         selected={field.value}
-                        onSelect={field.onChange}
+                        onSelect={(date) => field.onChange(date)}
+                        required
                         disabled={(date) =>
                           date > new Date(new Date().setFullYear(new Date().getFullYear() + 1)) || date < new Date("1900-01-01")
                         }
@@ -136,8 +137,8 @@ export function HolidayDialog({ isOpen, onClose }: HolidayDialogProps) {
               )}
             />
             <DialogFooter className="!mt-6">
-                <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-                <Button type="submit">Save Holiday</Button>
+              <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+              <Button type="submit">Save Holiday</Button>
             </DialogFooter>
           </form>
         </Form>

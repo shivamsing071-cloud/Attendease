@@ -114,5 +114,35 @@ service cloud.firestore {
       allow update: if isExistingDocAndSignedIn();
       allow delete: if isExistingDocAndSignedIn();
     }
+
+    /**
+     * @description Manages access to cancellation documents.
+     * @path /cancellations/{cancellationId}
+     * @allow (create) An authenticated user adds a new cancellation.
+     * @deny (get) An unauthenticated user tries to read a cancellation.
+     * @principle Grants full data access to any authenticated user, suitable for a single-user application.
+     */
+    match /cancellations/{cancellationId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isExistingDocAndSignedIn();
+      allow delete: if isExistingDocAndSignedIn();
+    }
+
+    /**
+     * @description Manages access to semester break documents.
+     * @path /semesterBreaks/{breakId}
+     * @allow (create) An authenticated user adds a new semester break.
+     * @deny (get) An unauthenticated user tries to read a semester break.
+     * @principle Grants full data access to any authenticated user, suitable for a single-user application.
+     */
+    match /semesterBreaks/{breakId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isExistingDocAndSignedIn();
+      allow delete: if isExistingDocAndSignedIn();
+    }
   }
 }
